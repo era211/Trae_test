@@ -58,13 +58,20 @@ function ChipsInput(containerId, initial = []) {
   const wrap = document.getElementById(containerId);
   let chips = [...initial];
 
+  function removeChip(idx) { chips.splice(idx, 1); render(); }
+
   function render() {
     wrap.innerHTML = '';
     chips.forEach((c, i) => {
       const chip = document.createElement('span');
       chip.className = 'chip';
-      chip.innerHTML = `${c}<button onclick="this.parentElement.__removeChip(${i})">×</button>`;
-      chip.__removeChip = (idx) => { chips.splice(idx, 1); render(); };
+      const label = document.createTextNode(c);
+      const btn = document.createElement('button');
+      btn.textContent = '×';
+      btn.setAttribute('type', 'button');
+      btn.addEventListener('click', () => removeChip(i));
+      chip.appendChild(label);
+      chip.appendChild(btn);
       wrap.appendChild(chip);
     });
     const inp = document.createElement('input');
@@ -80,7 +87,6 @@ function ChipsInput(containerId, initial = []) {
       }
     });
     wrap.appendChild(inp);
-    wrap.__removeChip = (idx) => { chips.splice(idx, 1); render(); };
   }
 
   render();
@@ -144,6 +150,10 @@ async function renderProjectsPage() {
 
   const projects = await API.get('/api/projects').catch(() => []);
 
+  // Store projects for safe access from event handlers
+  window._projectsCache = {};
+  projects.forEach(p => { window._projectsCache[p.id] = p; });
+
   main.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
       <div>
@@ -167,19 +177,29 @@ async function renderProjectsPage() {
       </div>
     `}
   `;
+
+  // Attach event listeners after DOM is rendered (safe, no inline JSON)
+  projects.forEach(p => {
+    const editBtn = document.getElementById(`edit-btn-${p.id}`);
+    const delBtn = document.getElementById(`del-btn-${p.id}`);
+    if (editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); showEditProjectModal(p.id); });
+    if (delBtn) delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteProject(p.id); });
+    const card = document.getElementById(`proj-card-${p.id}`);
+    if (card) card.addEventListener('click', () => navigate(`#/project/${p.id}`));
+  });
 }
 
 function renderProjectCard(p) {
   return `
-    <div class="card project-card" onclick="navigate('#/project/${p.id}')">
+    <div class="card project-card" id="proj-card-${p.id}" style="cursor:pointer">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
         <div>
           <div style="font-size:1rem;font-weight:600;margin-bottom:6px">${escHtml(p.name)}</div>
           <span class="badge ${TASK_COLORS[p.task_type]}">${TASK_LABELS[p.task_type]}</span>
         </div>
-        <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
-          <button class="btn btn-sm btn-secondary" onclick="showEditProjectModal(${p.id},'${escHtml(p.name)}',${JSON.stringify(p.labels)})">编辑</button>
-          <button class="btn btn-sm btn-danger-outline" onclick="deleteProject(${p.id})">删除</button>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-sm btn-secondary" id="edit-btn-${p.id}">编辑</button>
+          <button class="btn btn-sm btn-danger-outline" id="del-btn-${p.id}">删除</button>
         </div>
       </div>
       ${p.description ? `<p style="font-size:.85rem;color:var(--gray-500);margin-top:10px">${escHtml(p.description)}</p>` : ''}
@@ -237,7 +257,7 @@ window.doCreateProject = async function () {
   } catch (e) { toast(e.message, 'error'); }
 };
 
-window.showEditProjectModal = async function (id, name, labels) {
+window.showEditProjectModal = async function (id) {
   const project = await API.get(`/api/projects/${id}`).catch(() => null);
   if (!project) return;
   openModal(`
@@ -449,7 +469,7 @@ window.showGenerateModal = function (projectId, taskType) {
     <div class="modal-title">⚡ 生成数据集</div>
     <div class="form-group">
       <label>数据集名称 *</label>
-      <input type="text" id="gen-name" value="自动生成-${new Date().toLocaleDateString('zh-CN')}">
+      <input type="text" id="gen-name">
     </div>
     <div class="form-group">
       <label>生成数量</label>
@@ -460,6 +480,9 @@ window.showGenerateModal = function (projectId, taskType) {
       <button class="btn btn-primary" id="gen-btn" onclick="doGenerate(${projectId})">开始生成</button>
     </div>
   `);
+  // Set default name safely via DOM (avoid embedding dynamic content in HTML string)
+  const genNameInput = document.getElementById('gen-name');
+  if (genNameInput) genNameInput.value = `自动生成-${new Date().toLocaleDateString('zh-CN')}`;
 };
 
 window.doGenerate = async function (projectId) {

@@ -37,8 +37,8 @@ class Project(Base):
     description = Column(Text, default="")
     task_type = Column(SAEnum(TaskType), nullable=False)
     labels = Column(JSON, default=list)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
 
     datasets = relationship("Dataset", back_populates="project", cascade="all, delete-orphan")
 
@@ -50,8 +50,8 @@ class Dataset(Base):
     name = Column(String(200), nullable=False)
     description = Column(Text, default="")
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
 
     project = relationship("Project", back_populates="datasets")
     items = relationship("DataItem", back_populates="dataset", cascade="all, delete-orphan")
@@ -66,8 +66,8 @@ class DataItem(Base):
     status = Column(SAEnum(AnnotationStatus), default=AnnotationStatus.pending)
     annotation = Column(JSON, nullable=True)
     annotator = Column(String(100), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.utcnow())
+    updated_at = Column(DateTime, default=lambda: datetime.utcnow(), onupdate=lambda: datetime.utcnow())
 
     dataset = relationship("Dataset", back_populates="items")
 

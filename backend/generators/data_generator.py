@@ -112,8 +112,8 @@ def generate_instruction_tuning(count: int, **kwargs) -> list[dict]:
     instructions = [
         {
             "instruction": "将以下句子翻译成英文",
-            "input": fake_en.sentence(),
-            "hint": "请提供准确、自然的中文翻译",
+            "input": fake.sentence(nb_words=10),
+            "hint": "请提供准确、自然的英文翻译",
         },
         {
             "instruction": "对以下文本进行摘要",

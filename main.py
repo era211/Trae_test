@@ -40,7 +40,13 @@ async def serve_index():
 @app.get("/{path:path}", response_class=FileResponse)
 async def serve_spa(path: str):
     """Serve SPA – fall back to index.html for client-side routes."""
-    file_path = frontend_dir / path
+    # Resolve and validate that the resolved path stays inside frontend_dir
+    try:
+        file_path = (frontend_dir / path).resolve()
+        frontend_resolved = frontend_dir.resolve()
+        file_path.relative_to(frontend_resolved)  # raises ValueError if outside
+    except (ValueError, Exception):
+        return str(frontend_dir / "index.html")
     if file_path.exists() and file_path.is_file():
         return str(file_path)
     return str(frontend_dir / "index.html")

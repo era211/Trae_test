@@ -149,10 +149,10 @@ def export_dataset(dataset_id: int, fmt: str = "jsonl", db: Session = Depends(ge
         import json
         lines = []
         for item in items:
-            record = {**item.content, "annotation": item.annotation, "status": item.status}
+            record = {**item.content, "annotation": item.annotation, "status": item.status.value}
             lines.append(json.dumps(record, ensure_ascii=False))
         content = "\n".join(lines)
         return JSONResponse(content={"data": content, "filename": f"{ds.name}.jsonl"})
     # JSON array
-    records = [{**item.content, "annotation": item.annotation, "status": item.status} for item in items]
+    records = [{**item.content, "annotation": item.annotation, "status": item.status.value} for item in items]
     return JSONResponse(content={"data": records, "filename": f"{ds.name}.json"})
