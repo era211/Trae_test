@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据集生成与标注系统</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <header class="header">
+    <a href="#/" class="header-logo">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+        <path d="M7 8h10M7 11h7"/>
+      </svg>
+      数据集生成与标注系统
+    </a>
+    <nav class="header-nav">
+      <a href="#/projects">📁 项目</a>
+      <a href="#/events">📊 事件体系</a>
+      <a href="#/templates">📝 句子模板</a>
+    </nav>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+      <span style="font-size:.8rem;color:var(--gray-400)">Dataset Annotation Platform v1.0</span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="content" id="main-content">
+    <div style="display:flex;align-items:center;justify-content:center;height:200px">
+      <div class="spinner"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
