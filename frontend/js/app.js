@@ -22,7 +22,12 @@ function toast(msg, type = 'info') {
   const icons = { success: '✅', error: '❌', info: 'ℹ️' };
   const el = document.createElement('div');
   el.className = `toast ${type}`;
-  el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  const iconSpan = document.createElement('span');
+  iconSpan.textContent = icons[type];
+  const msgSpan = document.createElement('span');
+  msgSpan.textContent = msg;
+  el.appendChild(iconSpan);
+  el.appendChild(msgSpan);
   document.getElementById('toast-container').appendChild(el);
   setTimeout(() => el.remove(), 3500);
 }
